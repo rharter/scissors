@@ -69,7 +69,7 @@ public class CropView extends ImageView {
         touchManager = new TouchManager(MAX_TOUCH_POINTS, config);
 
         bitmapPaint.setFilterBitmap(true);
-        viewportPaint.setColor(config.getViewportHeaderFooterColor());
+        viewportPaint.setColor(config.getViewportOverlayColor());
     }
 
     @Override
@@ -81,13 +81,7 @@ public class CropView extends ImageView {
         }
 
         drawBitmap(canvas);
-
-        final int bottom = getBottom();
-        final int viewportWidth = touchManager.getViewportWidth();
-        final int viewportHeight = touchManager.getViewportHeight();
-        final int remainingHalf = (bottom - viewportHeight) / 2;
-        canvas.drawRect(0, 0, viewportWidth, remainingHalf, viewportPaint);
-        canvas.drawRect(0, bottom - remainingHalf, viewportWidth, bottom, viewportPaint);
+        drawOverlay(canvas);
     }
 
     private void drawBitmap(Canvas canvas) {
@@ -95,6 +89,18 @@ public class CropView extends ImageView {
         touchManager.applyPositioningAndScale(transform);
 
         canvas.drawBitmap(bitmap, transform, bitmapPaint);
+    }
+
+    private void drawOverlay(Canvas canvas) {
+        final int viewportWidth = touchManager.getViewportWidth();
+        final int viewportHeight = touchManager.getViewportHeight();
+        final int left = (getWidth() - viewportWidth) / 2;
+        final int top = (getHeight() - viewportHeight) / 2;
+
+        canvas.drawRect(0, top, left, getHeight() - top, viewportPaint);
+        canvas.drawRect(0, 0, getWidth(), top, viewportPaint);
+        canvas.drawRect(getWidth() - left, top, getWidth(), getHeight() - top, viewportPaint);
+        canvas.drawRect(0, getHeight() - top, getWidth(), getHeight(), viewportPaint);
     }
 
     @Override

@@ -22,11 +22,11 @@ def isReleaseBuild() {
 }
 
 def getRepositoryUsername() {
-    return hasProperty('SONATYPE_NEXUS_USERNAME') ? SONATYPE_NEXUS_USERNAME : "$System.env.SONATYPE_NEXUS_USERNAME"
+    return hasProperty('PIXITE_NEXUS_USERNAME') ? PIXITE_NEXUS_USERNAME : "$System.env.PIXITE_NEXUS_USERNAME"
 }
 
 def getRepositoryPassword() {
-    return hasProperty('SONATYPE_NEXUS_PASSWORD') ? SONATYPE_NEXUS_PASSWORD : "$System.env.SONATYPE_NEXUS_PASSWORD"
+    return hasProperty('PIXITE_NEXUS_PASSWORD') ? PIXITE_NEXUS_PASSWORD : "$System.env.PIXITE_NEXUS_PASSWORD"
 }
 
 afterEvaluate { project ->
@@ -39,10 +39,16 @@ afterEvaluate { project ->
                 pom.artifactId = POM_ARTIFACT_ID
                 pom.version = VERSION_NAME
 
-                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+//                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+//                    authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
+//                }
+                repository(url: "http://maven.analog-ocean.com:8081/content/repositories/releases") {
                     authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
                 }
-                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+//                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+//                    authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
+//                }
+                snapshotRepository(url: "http://maven.analog-ocean.com:8081/content/repositories/snapshots") {
                     authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
                 }
 

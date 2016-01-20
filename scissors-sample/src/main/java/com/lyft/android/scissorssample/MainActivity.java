@@ -40,16 +40,23 @@ import static rx.schedulers.Schedulers.io;
 
 public class MainActivity extends Activity {
 
+    private static final float[] ASPECT_RATIOS = { 0f, 1f, 3f/5f, 4f/5f, 16f/9f };
+
     @Bind(R.id.crop_view)
     CropView cropView;
 
-    @Bind({ R.id.crop_fab, R.id.pick_mini_fab })
+    @Bind({ R.id.crop_fab, R.id.pick_mini_fab, R.id.ratio_fab })
     List<View> buttons;
 
     @Bind(R.id.pick_fab)
     View pickButton;
 
+    @Bind(R.id.ratio_fab)
+    View ratioButton;
+
     CompositeSubscription subscriptions = new CompositeSubscription();
+
+    private int selectedRatio = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +108,12 @@ public class MainActivity extends Activity {
     public void onPickClicked() {
         cropView.extensions()
                 .pickUsing(this, RequestCodes.PICK_IMAGE_FROM_GALLERY);
+    }
+
+    @OnClick(R.id.ratio_fab)
+    public void onRatioClicked() {
+        selectedRatio = (selectedRatio + 1) % ASPECT_RATIOS.length;
+        cropView.setAspectRatio(ASPECT_RATIOS[selectedRatio]);
     }
 
     @Override

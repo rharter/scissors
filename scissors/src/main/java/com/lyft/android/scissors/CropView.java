@@ -109,10 +109,21 @@ public class CropView extends ImageView {
         resetTouchManager();
     }
 
+    /**
+     * Returns the aspect ratio of the crop rect and overlay.
+     *
+     * @return The current aspect ratio.
+     */
     public float getAspectRatio() {
         return touchManager.getAspectRatio();
     }
 
+    /**
+     * Returns the effective aspect ratio of the crop rect and overlay, which
+     * equals the native aspect ratio of the image if the set aspect ratio is 0.
+     *
+     * @return The effective aspect ratio.
+     */
     public float getEffectiveAspectRatio() {
         float aspect = touchManager.getAspectRatio();
         if (Float.compare(aspect, 0f) == 0) {
@@ -121,7 +132,13 @@ public class CropView extends ImageView {
         return aspect;
     }
 
-    public void setAspectRatio(float ratio) {
+  /**
+   * Sets the aspect ratio of the crop rect and overlay.
+   *
+   * @param ratio The ratio of the crop rect, 0 to match
+   * the image's native ratio.
+   */
+  public void setAspectRatio(float ratio) {
         touchManager.setAspectRatio(ratio);
         resetTouchManager();
         invalidate();

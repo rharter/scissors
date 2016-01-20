@@ -106,7 +106,7 @@ class CropViewExtensions {
 
         private final CropView cropView;
         private Bitmap.CompressFormat format = Bitmap.CompressFormat.JPEG;
-        private int quality = CropViewConfig.DEFAULT_IMAGE_QUALITY;
+        private int quality = CropView.DEFAULT_IMAGE_QUALITY;
 
         CropRequest(@NonNull CropView cropView) {
             Utils.checkNotNull(cropView, "cropView == null");
@@ -125,7 +125,7 @@ class CropViewExtensions {
         }
 
         /**
-         * Compression quality to use (must be 0..100), defaults to {@value CropViewConfig#DEFAULT_IMAGE_QUALITY}.
+         * Compression quality to use (must be 0..100), defaults to {@value CropView#DEFAULT_IMAGE_QUALITY}.
          *
          * @return current request for chaining.
          */

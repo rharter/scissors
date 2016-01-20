@@ -15,9 +15,11 @@
  */
 package com.lyft.android.scissorssample;
 
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -40,7 +42,7 @@ import static rx.schedulers.Schedulers.io;
 
 public class MainActivity extends Activity {
 
-    private static final float[] ASPECT_RATIOS = { 0f, 1f, 3f/5f, 4f/5f, 16f/9f };
+    private static final float[] ASPECT_RATIOS = { 0f, 1f, 6f/4f, 16f/9f };
 
     @Bind(R.id.crop_view)
     CropView cropView;
@@ -112,8 +114,24 @@ public class MainActivity extends Activity {
 
     @OnClick(R.id.ratio_fab)
     public void onRatioClicked() {
+        final float oldRatio = cropView.getEffectiveAspectRatio();
         selectedRatio = (selectedRatio + 1) % ASPECT_RATIOS.length;
-        cropView.setAspectRatio(ASPECT_RATIOS[selectedRatio]);
+
+        // an aspect ratio of 0 is a special case for cropView, so we can't animate
+        // between the current aspect at 0, but instead want to animate between
+        // the current aspect an the native aspect of the image.
+        float newRatio = ASPECT_RATIOS[selectedRatio];
+        if (Float.compare(0, newRatio) == 0) {
+            Bitmap bitmap = cropView.getImageBitmap();
+            if (bitmap != null) {
+                final int bWidth = bitmap.getWidth();
+                final int bHeight = bitmap.getHeight();
+                newRatio = (float) bWidth / bHeight;
+            }
+        }
+
+        ObjectAnimator.ofFloat(cropView, "aspectRatio", oldRatio, newRatio)
+            .start();
     }
 
     @Override

@@ -113,6 +113,14 @@ public class CropView extends ImageView {
         return touchManager.getAspectRatio();
     }
 
+    public float getEffectiveAspectRatio() {
+        float aspect = touchManager.getAspectRatio();
+        if (Float.compare(aspect, 0f) == 0) {
+            aspect = (float) touchManager.getViewportWidth() / touchManager.getViewportHeight();
+        }
+        return aspect;
+    }
+
     public void setAspectRatio(float ratio) {
         touchManager.setAspectRatio(ratio);
         resetTouchManager();

@@ -32,6 +32,7 @@ class TouchManager {
     private float minimumScale;
     private float maximumScale;
     private Rect imageBounds;
+    private float aspectRatio;
     private int viewportWidth;
     private int viewportHeight;
     private int bitmapWidth;
@@ -81,15 +82,14 @@ class TouchManager {
     public void resetFor(int bitmapWidth, int bitmapHeight, int availableWidth, int availableHeight) {
         position.set(availableWidth / 2, availableHeight / 2);
 
+        aspectRatio = cropViewConfig.getViewportRatio();
         imageBounds = new Rect(0, 0, availableWidth / 2, availableHeight / 2);
         setViewport(bitmapWidth, bitmapHeight, availableWidth, availableHeight);
 
         this.bitmapWidth = bitmapWidth;
         this.bitmapHeight = bitmapHeight;
         setMinimumScale();
-
-        horizontalLimit = computeLimit(bitmapWidth, viewportWidth);
-        verticalLimit = computeLimit(bitmapHeight, viewportHeight);
+        setLimits();
     }
 
     public int getViewportWidth() {
@@ -98,6 +98,15 @@ class TouchManager {
 
     public int getViewportHeight() {
         return viewportHeight;
+    }
+
+    public float getAspectRatio() {
+        return aspectRatio;
+    }
+
+    public void setAspectRatio(float ratio) {
+        aspectRatio = ratio;
+        cropViewConfig.setViewportRatio(ratio);
     }
 
     private void handleDragGesture() {
@@ -112,8 +121,7 @@ class TouchManager {
             return;
         }
         updateScale();
-        horizontalLimit = computeLimit((int) (bitmapWidth * scale), viewportWidth);
-        verticalLimit = computeLimit((int) (bitmapHeight * scale), viewportHeight);
+        setLimits();
     }
 
     @TargetApi(Build.VERSION_CODES.FROYO)
@@ -184,6 +192,11 @@ class TouchManager {
             viewportHeight = availableHeight - cropViewConfig.getViewportOverlayPadding() * 2;
             viewportWidth = (int) (viewportHeight * ratio);
         }
+    }
+
+    private void setLimits() {
+        horizontalLimit = computeLimit((int) (bitmapWidth * scale), viewportWidth);
+        verticalLimit = computeLimit((int) (bitmapHeight * scale), viewportHeight);
     }
 
     private void setMinimumScale() {

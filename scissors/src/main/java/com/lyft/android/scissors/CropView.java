@@ -109,6 +109,16 @@ public class CropView extends ImageView {
         resetTouchManager();
     }
 
+    public float getAspectRatio() {
+        return touchManager.getAspectRatio();
+    }
+
+    public void setAspectRatio(float ratio) {
+        touchManager.setAspectRatio(ratio);
+        resetTouchManager();
+        invalidate();
+    }
+
     @Override
     public void setImageResource(@DrawableRes int resId) {
         final Bitmap bitmap = resId > 0

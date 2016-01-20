@@ -27,12 +27,14 @@ class CropViewConfig {
     public static final int DEFAULT_IMAGE_QUALITY = 100;
     public static final int DEFAULT_VIEWPORT_OVERLAY_PADDING = 0;
     public static final int DEFAULT_VIEWPORT_OVERLAY_COLOR = 0xC8000000; // Black with 200 alpha
+    public static final boolean DEFAULT_SNAPPING_ENABLED = true;
 
     private float viewportRatio = DEFAULT_VIEWPORT_RATIO;
     private float maxScale = DEFAULT_MAXIMUM_SCALE;
     private float minScale = DEFAULT_MINIMUM_SCALE;
     private int viewportOverlayPadding = DEFAULT_VIEWPORT_OVERLAY_PADDING;
     private int viewportOverlayColor = DEFAULT_VIEWPORT_OVERLAY_COLOR;
+    private boolean snappingEnabled = DEFAULT_SNAPPING_ENABLED;
 
     public int getViewportOverlayColor() {
         return viewportOverlayColor;
@@ -74,6 +76,14 @@ class CropViewConfig {
         this.minScale = minScale <= 0 ? DEFAULT_MINIMUM_SCALE : minScale;
     }
 
+    public boolean isSnappingEnabled() {
+        return snappingEnabled;
+    }
+
+    public void setSnappingEnabled(boolean snappingEnabled) {
+        this.snappingEnabled = snappingEnabled;
+    }
+
     public static CropViewConfig from(Context context, AttributeSet attrs) {
         final CropViewConfig cropViewConfig = new CropViewConfig();
 
@@ -105,6 +115,9 @@ class CropViewConfig {
             attributes.getDimensionPixelSize(R.styleable.CropView_cropviewViewportOverlayPadding,
                 CropViewConfig.DEFAULT_VIEWPORT_OVERLAY_PADDING));
 
+        cropViewConfig.setSnappingEnabled(
+                    attributes.getBoolean(R.styleable.CropView_cropviewSnappingEnabled,
+                        CropViewConfig.DEFAULT_SNAPPING_ENABLED));
         attributes.recycle();
 
         return cropViewConfig;

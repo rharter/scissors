@@ -71,7 +71,7 @@ class TouchManager {
         handleDragGesture();
         handlePinchGesture();
 
-        if (isUpAction(event.getActionMasked())) {
+        if (!cropViewConfig.isSnappingEnabled() || isUpAction(event.getActionMasked())) {
             ensureInsideViewport();
         }
     }

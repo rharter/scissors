@@ -41,7 +41,7 @@ class TouchManager {
     private int verticalLimit;
     private int horizontalLimit;
 
-    private float scale = 1.0f;
+    private float scale = -1.0f;
     private TouchPoint position = new TouchPoint();
 
     public TouchManager(final int maxNumberOfTouchPoints, final CropViewConfig cropViewConfig) {
@@ -70,7 +70,10 @@ class TouchManager {
 
         handleDragGesture();
         handlePinchGesture();
-        handleDragOutsideViewport(event);
+
+        if (isUpAction(event.getActionMasked())) {
+            ensureInsideViewport();
+        }
     }
 
     public void applyPositioningAndScale(Matrix matrix) {
@@ -80,16 +83,17 @@ class TouchManager {
     }
 
     public void resetFor(int bitmapWidth, int bitmapHeight, int availableWidth, int availableHeight) {
-        position.set(availableWidth / 2, availableHeight / 2);
-
         aspectRatio = cropViewConfig.getViewportRatio();
         imageBounds = new Rect(0, 0, availableWidth / 2, availableHeight / 2);
         setViewport(bitmapWidth, bitmapHeight, availableWidth, availableHeight);
 
         this.bitmapWidth = bitmapWidth;
         this.bitmapHeight = bitmapHeight;
-        setMinimumScale();
-        setLimits();
+        if (bitmapWidth > 0 && bitmapHeight > 0) {
+            setMinimumScale();
+            setLimits();
+            ensureInsideViewport();
+        }
     }
 
     public int getViewportWidth() {
@@ -124,14 +128,14 @@ class TouchManager {
         setLimits();
     }
 
-    @TargetApi(Build.VERSION_CODES.FROYO)
-    private void handleDragOutsideViewport(MotionEvent event) {
-        if (imageBounds == null || !isUpAction(event.getActionMasked())) {
+    private void ensureInsideViewport() {
+        if (imageBounds == null) {
             return;
         }
 
         float newY = position.getY();
         int bottom = imageBounds.bottom;
+
 
         if (bottom - newY >= verticalLimit) {
             newY = bottom - verticalLimit;
@@ -202,19 +206,8 @@ class TouchManager {
     private void setMinimumScale() {
         final float fw = (float) viewportWidth / bitmapWidth;
         final float fh = (float) viewportHeight / bitmapHeight;
-        scale = minimumScale = Math.max(fw, fh);
-        //float imageAspect = (float) bitmapWidth / bitmapHeight;
-        //float viewportAspect = (float) viewportWidth / viewportHeight;
-        //
-        //
-        //if (bitmapWidth < viewportWidth || bitmapHeight < viewportHeight) {
-        //    minimumScale = 1f;
-        //} else if (imageAspect > viewportAspect) {
-        //    minimumScale = (float) viewportHeight / bitmapHeight;
-        //} else {
-        //    minimumScale = (float) viewportWidth / bitmapWidth;
-        //}
-        //scale = minimumScale;
+        minimumScale = Math.max(fw, fh);
+        scale = Math.max(scale, minimumScale);
     }
 
     private void updateScale() {

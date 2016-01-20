@@ -24,11 +24,12 @@ import android.view.MotionEvent;
 class TouchManager {
 
     private final int maxNumberOfTouchPoints;
-    private final CropViewConfig cropViewConfig;
 
     private final TouchPoint[] points;
     private final TouchPoint[] previousPoints;
 
+    private int overlayPadding;
+    private boolean snappingEnabled;
     private float minimumScale;
     private float maximumScale;
     private Rect imageBounds;
@@ -44,14 +45,18 @@ class TouchManager {
     private float scale = -1.0f;
     private TouchPoint position = new TouchPoint();
 
-    public TouchManager(final int maxNumberOfTouchPoints, final CropViewConfig cropViewConfig) {
+    public TouchManager(final int maxNumberOfTouchPoints, final float aspectRatio,
+        final int overlayPadding, final boolean snappingEnabled,
+        final float minimumScale, final float maximumScale) {
         this.maxNumberOfTouchPoints = maxNumberOfTouchPoints;
-        this.cropViewConfig = cropViewConfig;
+        this.aspectRatio = aspectRatio;
+        this.overlayPadding = overlayPadding;
+        this.snappingEnabled = snappingEnabled;
+        this.minimumScale = minimumScale;
+        this.maximumScale = maximumScale;
 
         points = new TouchPoint[maxNumberOfTouchPoints];
         previousPoints = new TouchPoint[maxNumberOfTouchPoints];
-        minimumScale = cropViewConfig.getMinScale();
-        maximumScale = cropViewConfig.getMaxScale();
     }
 
     @TargetApi(Build.VERSION_CODES.FROYO)
@@ -71,7 +76,7 @@ class TouchManager {
         handleDragGesture();
         handlePinchGesture();
 
-        if (!cropViewConfig.isSnappingEnabled() || isUpAction(event.getActionMasked())) {
+        if (!snappingEnabled || isUpAction(event.getActionMasked())) {
             ensureInsideViewport();
         }
     }
@@ -83,7 +88,6 @@ class TouchManager {
     }
 
     public void resetFor(int bitmapWidth, int bitmapHeight, int availableWidth, int availableHeight) {
-        aspectRatio = cropViewConfig.getViewportRatio();
         imageBounds = new Rect(0, 0, availableWidth / 2, availableHeight / 2);
         setViewport(bitmapWidth, bitmapHeight, availableWidth, availableHeight);
 
@@ -110,7 +114,46 @@ class TouchManager {
 
     public void setAspectRatio(float ratio) {
         aspectRatio = ratio;
-        cropViewConfig.setViewportRatio(ratio);
+    }
+
+    public int getOverlayPadding() {
+        return overlayPadding;
+    }
+
+    public void setOverlayPadding(int overlayPadding) {
+        this.overlayPadding = overlayPadding;
+    }
+
+    public boolean isSnappingEnabled() {
+        return snappingEnabled;
+    }
+
+    public void setSnappingEnabled(boolean snappingEnabled) {
+        this.snappingEnabled = snappingEnabled;
+    }
+
+    public float getMinimumScale() {
+        return minimumScale;
+    }
+
+    public void setMinimumScale(float minimumScale) {
+        this.minimumScale = minimumScale;
+    }
+
+    public float getMaximumScale() {
+        return maximumScale;
+    }
+
+    public void setMaximumScale(float maximumScale) {
+        this.maximumScale = maximumScale;
+    }
+
+    public float getScale() {
+        return scale;
+    }
+
+    public void setScale(float scale) {
+        this.scale = scale;
     }
 
     private void handleDragGesture() {
@@ -181,7 +224,7 @@ class TouchManager {
         final float imageAspect = (float) bitmapWidth / bitmapHeight;
         final float viewAspect = (float) availableWidth / availableHeight;
 
-        float ratio = cropViewConfig.getViewportRatio();
+        float ratio = aspectRatio;
         if (Float.compare(0f, ratio) == 0) {
             // viewport ratio of 0 means match native ratio of bitmap
             ratio = imageAspect;
@@ -189,11 +232,11 @@ class TouchManager {
 
         if (imageAspect > viewAspect) {
             // image is wider than view
-            viewportWidth = availableWidth - cropViewConfig.getViewportOverlayPadding() * 2;
+            viewportWidth = availableWidth - overlayPadding * 2;
             viewportHeight = (int) (viewportWidth * (1 / ratio));
         } else {
             // image is taller than view
-            viewportHeight = availableHeight - cropViewConfig.getViewportOverlayPadding() * 2;
+            viewportHeight = availableHeight - overlayPadding * 2;
             viewportWidth = (int) (viewportHeight * ratio);
         }
     }

@@ -18,6 +18,7 @@ package com.lyft.android.scissors;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -42,6 +43,14 @@ import java.io.OutputStream;
  */
 public class CropView extends ImageView {
 
+    public static final float DEFAULT_VIEWPORT_RATIO = 0f;
+    public static final float DEFAULT_MAXIMUM_SCALE = 10f;
+    public static final float DEFAULT_MINIMUM_SCALE = 0f;
+    public static final int DEFAULT_IMAGE_QUALITY = 100;
+    public static final int DEFAULT_VIEWPORT_OVERLAY_PADDING = 0;
+    public static final int DEFAULT_VIEWPORT_OVERLAY_COLOR = 0xC8000000; // Black with 200 alpha
+    public static final boolean DEFAULT_SNAPPING_ENABLED = true;
+
     private static final int MAX_TOUCH_POINTS = 2;
     private TouchManager touchManager;
 
@@ -64,12 +73,38 @@ public class CropView extends ImageView {
     }
 
     void initCropView(Context context, AttributeSet attrs) {
-        CropViewConfig config = CropViewConfig.from(context, attrs);
 
-        touchManager = new TouchManager(MAX_TOUCH_POINTS, config);
+        TypedArray attributes = context.obtainStyledAttributes(
+            attrs,
+            R.styleable.CropView);
+
+        final float aspectRatio = attributes.getFloat(R.styleable.CropView_cropviewViewportRatio,
+                DEFAULT_VIEWPORT_RATIO);
+
+        final float maxScale = attributes.getFloat(R.styleable.CropView_cropviewMaxScale,
+                DEFAULT_MAXIMUM_SCALE);
+
+        final float minScale = attributes.getFloat(R.styleable.CropView_cropviewMinScale,
+                DEFAULT_MINIMUM_SCALE);
+
+        final int overlayColor = attributes.getColor(
+                R.styleable.CropView_cropviewViewportOverlayColor,
+                DEFAULT_VIEWPORT_OVERLAY_COLOR);
+
+        final int overlayPadding = attributes.getDimensionPixelSize(
+                R.styleable.CropView_cropviewViewportOverlayPadding,
+                DEFAULT_VIEWPORT_OVERLAY_PADDING);
+
+        final boolean snappingEnabled = attributes.getBoolean(
+                R.styleable.CropView_cropviewSnappingEnabled,
+                DEFAULT_SNAPPING_ENABLED);
+        attributes.recycle();
+
+        touchManager = new TouchManager(MAX_TOUCH_POINTS, aspectRatio, overlayPadding,
+            snappingEnabled, minScale, maxScale);
 
         bitmapPaint.setFilterBitmap(true);
-        viewportPaint.setColor(config.getViewportOverlayColor());
+        viewportPaint.setColor(overlayColor);
     }
 
     @Override
@@ -132,16 +167,96 @@ public class CropView extends ImageView {
         return aspect;
     }
 
-  /**
-   * Sets the aspect ratio of the crop rect and overlay.
-   *
-   * @param ratio The ratio of the crop rect, 0 to match
-   * the image's native ratio.
-   */
-  public void setAspectRatio(float ratio) {
+    /**
+     * Sets the aspect ratio of the crop rect and overlay.
+     *
+     * @param ratio The ratio of the crop rect, 0 to match
+     * the image's native ratio.
+     */
+    public void setAspectRatio(float ratio) {
         touchManager.setAspectRatio(ratio);
         resetTouchManager();
         invalidate();
+    }
+
+    /**
+     * The maximum that the image can be zoomed.
+     * @return The maximum amount of scaling.
+     */
+    public float getMaxScale() {
+        return touchManager.getMaximumScale();
+    }
+
+    /**
+     * Sets that maximum amount that the image can be zoomed.
+     * @param maxScale The maximum amount of scaling.
+     */
+    public void setMaxScale(float maxScale) {
+        touchManager.setMaximumScale(maxScale);
+    }
+
+    /**
+     * The minimum that the image can be zoomed.
+     * @return The minimum amount of scaling.
+     */
+    public float getMinScale() {
+        return touchManager.getMinimumScale();
+    }
+
+    /**
+     * Sets the minimum amount that the image can be zoomed.
+     * @param minScale The minimum amount of scaling.
+     */
+    public void setMinScale(float minScale) {
+        touchManager.setMinimumScale(minScale);
+        resetTouchManager();
+        invalidate();
+    }
+
+    /**
+     * The amount of padding of the overlay around all sides
+     * of the view, regardless of aspect ratio.
+     * @return The padding of the overlay.
+     */
+    public int getViewportOverlayPadding() {
+        return touchManager.getOverlayPadding();
+    }
+
+    /**
+     * Sets the amount of padding for the overlay around all
+     * sides of the view, regardless of aspect ratio.
+     * @param padding The overlay padding to set.
+     */
+    public void setViewportOverlayPadding(int padding) {
+        touchManager.setOverlayPadding(padding);
+        resetTouchManager();
+        invalidate();
+    }
+
+    /**
+     * Whether or not snapping is enabled.
+     *
+     * <p>If true, the image will always follow the drag,
+     * and then snap back into a valid position once the
+     * user has released. Otherwise, the user will be unable
+     * to drag the image beyond the bounds of the viewport.
+     * @return True if snapping is enabled, false otherwise.
+     */
+    public boolean isSnappingEnabled() {
+        return touchManager.isSnappingEnabled();
+    }
+
+    /**
+     * Turns on or off snapping.
+     *
+     * <p>If true, the image will always follow the drag,
+     * and then snap back into a valid position once the
+     * user has released. Otherwise, the user will be unable
+     * to drag the image beyond the bounds of the viewport.
+     * @param enabled True to enable snapping, false otherwise.
+     */
+    public void setSnappingEnabled(boolean enabled) {
+        touchManager.setSnappingEnabled(enabled);
     }
 
     @Override

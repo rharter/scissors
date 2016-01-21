@@ -312,7 +312,9 @@ public class CropView extends ImageView {
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         super.dispatchTouchEvent(event);
-
+        if (!isEnabled()) {
+            return false;
+        }
         touchManager.onEvent(event);
         invalidate();
         return true;

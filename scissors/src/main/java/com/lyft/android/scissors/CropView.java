@@ -214,6 +214,22 @@ public class CropView extends ImageView {
     }
 
     /**
+     * The current scale value of the image.
+     * @return The current scale value of the image.
+     */
+    public float getScale() {
+        return touchManager.getScale();
+    }
+
+    /**
+     * Sets the current scale value of the image.
+     * @param scale The scale to set.
+     */
+    public void setScale(float scale) {
+        touchManager.setScale(scale);
+    }
+
+    /**
      * The amount of padding of the overlay around all sides
      * of the view, regardless of aspect ratio.
      * @return The padding of the overlay.

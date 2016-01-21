@@ -230,12 +230,12 @@ class TouchManager {
             ratio = imageAspect;
         }
 
-        if (imageAspect > viewAspect) {
-            // image is wider than view
+        if (ratio > viewAspect) {
+            // viewport is wider than view
             viewportWidth = availableWidth - overlayPadding * 2;
             viewportHeight = (int) (viewportWidth * (1 / ratio));
         } else {
-            // image is taller than view
+            // viewport is taller than view
             viewportHeight = availableHeight - overlayPadding * 2;
             viewportWidth = (int) (viewportHeight * ratio);
         }

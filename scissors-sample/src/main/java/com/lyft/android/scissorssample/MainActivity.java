@@ -42,7 +42,7 @@ import static rx.schedulers.Schedulers.io;
 
 public class MainActivity extends Activity {
 
-    private static final float[] ASPECT_RATIOS = { 0f, 1f, 6f/4f, 16f/9f };
+    private static final float[] ASPECT_RATIOS = { 0f, 1f, 6f/4f, 1f / (16f/9f) };
 
     @Bind(R.id.crop_view)
     CropView cropView;

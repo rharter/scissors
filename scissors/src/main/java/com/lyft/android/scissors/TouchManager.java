@@ -153,7 +153,7 @@ class TouchManager {
     }
 
     public void setScale(float scale) {
-        this.scale = scale;
+        this.scale = Math.max(Math.min(scale, maximumScale), minimumScale);
     }
 
     private void handleDragGesture() {

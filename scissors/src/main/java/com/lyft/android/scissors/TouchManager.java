@@ -310,4 +310,8 @@ class TouchManager {
     private static boolean isUpAction(int actionMasked) {
         return actionMasked == MotionEvent.ACTION_POINTER_UP || actionMasked == MotionEvent.ACTION_UP;
     }
+
+    public TouchPoint getPosition() {
+        return position;
+    }
 }

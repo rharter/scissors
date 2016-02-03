@@ -144,6 +144,14 @@ public class CropView extends ImageView {
         resetTouchManager();
     }
 
+    public float getPositionX() {
+        return touchManager.getPosition().getX();
+    }
+
+    public float getPositionY() {
+        return touchManager.getPosition().getY();
+    }
+
     /**
      * Returns the aspect ratio of the crop rect and overlay.
      *

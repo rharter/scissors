@@ -144,10 +144,16 @@ public class CropView extends ImageView {
         resetTouchManager();
     }
 
+    /**
+     * @return The translated x position of the image within the view.
+     */
     public float getPositionX() {
         return touchManager.getPosition().getX();
     }
 
+    /**
+     * @return The translated y position of the image within the view.
+     */
     public float getPositionY() {
         return touchManager.getPosition().getY();
     }

@@ -18,6 +18,7 @@ package com.lyft.android.scissors;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -42,6 +43,12 @@ import java.io.OutputStream;
  */
 public class CropView extends ImageView {
 
+    public static final float DEFAULT_VIEWPORT_HEIGHT_RATIO = 1f;
+    public static final float DEFAULT_MAXIMUM_SCALE = 10f;
+    public static final float DEFAULT_MINIMUM_SCALE = 0f;
+    public static final int DEFAULT_IMAGE_QUALITY = 100;
+    public static final int DEFAULT_VIEWPORT_HEADER_FOOTER_COLOR = 0xC8000000; // Black with 200 alpha
+
     private static final int MAX_TOUCH_POINTS = 2;
     private TouchManager touchManager;
 
@@ -64,12 +71,26 @@ public class CropView extends ImageView {
     }
 
     void initCropView(Context context, AttributeSet attrs) {
-        CropViewConfig config = CropViewConfig.from(context, attrs);
+        TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.CropView);
 
-        touchManager = new TouchManager(MAX_TOUCH_POINTS, config);
+        final float viewportHeightRatio = attributes.getFloat(
+            R.styleable.CropView_cropviewViewportHeightRatio, DEFAULT_VIEWPORT_HEIGHT_RATIO);
+
+        final float maxScale = attributes.getFloat(R.styleable.CropView_cropviewMaxScale,
+            DEFAULT_MAXIMUM_SCALE);
+
+        final float minScale = attributes.getFloat(R.styleable.CropView_cropviewMinScale,
+            DEFAULT_MINIMUM_SCALE);
+
+        final int viewportHeaderFooterColor = attributes.getColor(
+            R.styleable.CropView_cropviewViewportHeaderFooterColor,
+            DEFAULT_VIEWPORT_HEADER_FOOTER_COLOR);
+        attributes.recycle();
+
+        touchManager = new TouchManager(MAX_TOUCH_POINTS, viewportHeightRatio, minScale, maxScale);
 
         bitmapPaint.setFilterBitmap(true);
-        viewportPaint.setColor(config.getViewportHeaderFooterColor());
+        viewportPaint.setColor(viewportHeaderFooterColor);
     }
 
     @Override
@@ -151,6 +172,105 @@ public class CropView extends ImageView {
         final int bitmapWidth = invalidBitmap ? 0 : bitmap.getWidth();
         final int bitmapHeight = invalidBitmap ? 0 : bitmap.getHeight();
         touchManager.resetFor(bitmapWidth, bitmapHeight, getWidth(), getHeight());
+    }
+
+    /**
+     * @return The translated x position of the image within the view.
+     */
+    public float getPositionX() {
+        return touchManager.getPosition().getX();
+    }
+
+    /**
+     * @return The translated y position of the image within the view.
+     */
+    public float getPositionY() {
+        return touchManager.getPosition().getY();
+    }
+
+    /**
+     * Returns the aspect ratio of the crop rect and overlay.
+     *
+     * @return The current aspect ratio.
+     */
+    public float getAspectRatio() {
+        return touchManager.getAspectRatio();
+    }
+
+    /**
+     * Returns the effective aspect ratio of the crop rect and overlay, which
+     * equals the native aspect ratio of the image if the set aspect ratio is 0.
+     *
+     * @return The effective aspect ratio.
+     */
+    public float getEffectiveAspectRatio() {
+        float aspect = touchManager.getAspectRatio();
+        if (Float.compare(aspect, 0f) == 0) {
+            aspect = (float) touchManager.getViewportWidth() / touchManager.getViewportHeight();
+        }
+        return aspect;
+    }
+
+    /**
+     * Sets the aspect ratio of the crop rect and overlay.
+     *
+     * @param ratio The ratio of the crop rect, 0 to match
+     * the image's native ratio.
+     */
+    public void setAspectRatio(float ratio) {
+        touchManager.setAspectRatio(ratio);
+        resetTouchManager();
+        invalidate();
+    }
+
+    /**
+     * The maximum that the image can be zoomed.
+     * @return The maximum amount of scaling.
+     */
+    public float getMaxScale() {
+        return touchManager.getMaximumScale();
+    }
+
+    /**
+     * Sets that maximum amount that the image can be zoomed.
+     * @param maxScale The maximum amount of scaling.
+     */
+    public void setMaxScale(float maxScale) {
+        touchManager.setMaximumScale(maxScale);
+    }
+
+    /**
+     * The minimum that the image can be zoomed.
+     * @return The minimum amount of scaling.
+     */
+    public float getMinScale() {
+        return touchManager.getMinimumScale();
+    }
+
+    /**
+     * Sets the minimum amount that the image can be zoomed.
+     * @param minScale The minimum amount of scaling.
+     */
+    public void setMinScale(float minScale) {
+        touchManager.setMinimumScale(minScale);
+        resetTouchManager();
+        invalidate();
+    }
+
+    /**
+     * The current scale value of the image.
+     * @return The current scale value of the image.
+     */
+    public float getScale() {
+        return touchManager.getScale();
+    }
+
+    /**
+     * Sets the current scale value of the image.
+     * @param scale The scale to set.
+     */
+    public void setScale(float scale) {
+        touchManager.setScale(scale);
     }
 
     @Override

@@ -24,7 +24,6 @@ import android.view.MotionEvent;
 class TouchManager {
 
     private final int maxNumberOfTouchPoints;
-    private final CropViewConfig cropViewConfig;
 
     private final TouchPoint[] points;
     private final TouchPoint[] previousPoints;
@@ -32,6 +31,7 @@ class TouchManager {
     private float minimumScale;
     private float maximumScale;
     private Rect imageBounds;
+    private float aspectRatio;
     private int viewportWidth;
     private int viewportHeight;
     private int bitmapWidth;
@@ -40,17 +40,18 @@ class TouchManager {
     private int verticalLimit;
     private int horizontalLimit;
 
-    private float scale = 1.0f;
+    private float scale = -1.0f;
     private TouchPoint position = new TouchPoint();
 
-    public TouchManager(final int maxNumberOfTouchPoints, final CropViewConfig cropViewConfig) {
+    public TouchManager(final int maxNumberOfTouchPoints, final float aspectRatio,
+        final float minimumScale, final float maximumScale) {
         this.maxNumberOfTouchPoints = maxNumberOfTouchPoints;
-        this.cropViewConfig = cropViewConfig;
+        this.aspectRatio = aspectRatio;
+        this.minimumScale = minimumScale;
+        this.maximumScale = maximumScale;
 
         points = new TouchPoint[maxNumberOfTouchPoints];
         previousPoints = new TouchPoint[maxNumberOfTouchPoints];
-        minimumScale = cropViewConfig.getMinScale();
-        maximumScale = cropViewConfig.getMaxScale();
     }
 
     @TargetApi(Build.VERSION_CODES.FROYO)
@@ -98,6 +99,38 @@ class TouchManager {
 
     public int getViewportHeight() {
         return viewportHeight;
+    }
+
+    public float getAspectRatio() {
+        return aspectRatio;
+    }
+
+    public void setAspectRatio(float ratio) {
+        aspectRatio = ratio;
+    }
+
+    public float getMinimumScale() {
+        return minimumScale;
+    }
+
+    public void setMinimumScale(float minimumScale) {
+        this.minimumScale = minimumScale;
+    }
+
+    public float getMaximumScale() {
+        return maximumScale;
+    }
+
+    public void setMaximumScale(float maximumScale) {
+        this.maximumScale = maximumScale;
+    }
+
+    public float getScale() {
+        return scale;
+    }
+
+    public void setScale(float scale) {
+        this.scale = Math.max(Math.min(scale, maximumScale), minimumScale);
     }
 
     private void handleDragGesture() {
@@ -167,7 +200,7 @@ class TouchManager {
 
     private void setViewport(int w) {
         viewportWidth = w;
-        viewportHeight = (int) (w * cropViewConfig.getViewportHeightRatio());
+        viewportHeight = (int) (w * aspectRatio);
     }
 
     private void setMinimumScale() {
@@ -241,5 +274,9 @@ class TouchManager {
 
     private static boolean isUpAction(int actionMasked) {
         return actionMasked == MotionEvent.ACTION_POINTER_UP || actionMasked == MotionEvent.ACTION_UP;
+    }
+
+    public TouchPoint getPosition() {
+        return position;
     }
 }
